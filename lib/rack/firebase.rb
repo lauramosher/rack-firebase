@@ -16,5 +16,6 @@ module Rack
     end
   end
 end
-
+require "rack/firebase/error"
 require "rack/firebase/authorization_header"
+require "rack/firebase/middleware"
