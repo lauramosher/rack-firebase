@@ -3,7 +3,7 @@ require File.expand_path("lib/rack/firebase/version", __dir__)
 Gem::Specification.new do |s|
   s.name = "rack-firebase"
   s.version = Rack::Firebase::VERSION
-  s.authors = ["Laura Mosher"]
+  s.author = "Laura Mosher"
   s.email = "laura@mosher.tech"
 
   s.summary = "Verify Firebase ID Tokens in Middleware"
@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/lauramosher/rack-firebase"
   s.license = "MIT"
 
-  s.files = Dir["lib/**/*.rb", "rack-firebase.gemspec"]
+  s.files = Dir["lib/**/*.rb"] + %w(LICENSE README.md)
   s.require_paths = ["lib"]
 
   s.add_dependency "rack", ">=2.0"
