@@ -20,5 +20,6 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rspec", "~> 2.14"
   s.add_development_dependency "rack-test", "~> 2.0.2"
+  s.add_development_dependency "simplecov", "~> 0.22.0"
   s.add_development_dependency "standard", "~> 1.9.0"
 end

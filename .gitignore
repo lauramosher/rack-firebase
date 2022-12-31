@@ -2,3 +2,5 @@ Gemfile.lock
 
 *.gem
 *.gemfile.lock
+
+coverage
