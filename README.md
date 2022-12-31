@@ -1,6 +1,6 @@
 # Rack Firebase Middleware
 
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md) [![Gem Version](https://badge.fury.io/rb/rack-firebase.svg)](https://rubygems.org/gems/rack-firebase)
 
 
 A rack middleware for verifying ID tokens from Google's Firebase. It provides token decoding and verification using [Firebase's 3rd Party Verification constraints](https://firebase.google.com/docs/auth/admin/verify-id-tokens?hl=en&authuser=3#verify_id_tokens_using_a_third-party_jwt_library).
