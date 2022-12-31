@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/lauramosher/rack-firebase"
   s.license = "MIT"
 
-  s.files = Dir["lib/**/*.rb"] + %w(LICENSE README.md)
+  s.files = Dir["lib/**/*.rb"] + %w[LICENSE README.md]
   s.require_paths = ["lib"]
 
   s.add_dependency "rack", ">=2.0"
