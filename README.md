@@ -51,7 +51,7 @@ For example, assuming your User's model has a `uid` attribute for storing Fireba
 def current_user
   return @current_user if defined? @current_user
 
-  uid = request.env[Rack::Firebase::USER_UID]
+  uid = request.env[Rack::Firebase::Middleware::USER_UID]
   if uid
     @current_user = User.find_by(uid: uid)
   end
