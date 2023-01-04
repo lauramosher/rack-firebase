@@ -287,6 +287,24 @@ RSpec.describe Rack::Firebase::Middleware do
         expect(last_response).to be_ok
         expect(last_request.env[described_class::USER_UID]).to eq("123")
       end
+
+      context "and route is considered public" do
+        before do
+          Rack::Firebase.configure do |config|
+            config.public_routes = ["/"]
+          end
+        end
+
+        after do
+          Rack::Firebase.configuration.reset!
+        end
+
+        it "returns a 200 success" do
+          get "/"
+
+          expect(last_response).to be_ok
+        end
+      end
     end
   end
 
@@ -295,6 +313,12 @@ RSpec.describe Rack::Firebase::Middleware do
     let(:token) { JWT.encode({}, secret, "RS256", kid: "1234567890") }
 
     let(:net_response) { Net::HTTPResponse.new(1.0, "200", "OK") }
+
+    before do
+      Rack::Firebase.configure do |config|
+        config.project_ids = ["test-project-id"]
+      end
+    end
 
     context "when there are no cached public keys" do
       let(:certs) { File.read("#{CERT_PATH}/certificates.json") }

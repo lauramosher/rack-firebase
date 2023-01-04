@@ -21,13 +21,16 @@ RSpec.describe Rack::Firebase do
     before do
       Rack::Firebase.configure do |config|
         config.project_ids = 1
+        config.public_routes = ["/healthcheck"]
       end
     end
 
     it "resets the configuration" do
       expect(Rack::Firebase.configuration.project_ids).to eq(1)
+      expect(Rack::Firebase.configuration.public_routes).to eq(["/healthcheck"])
       Rack::Firebase.configuration.reset!
       expect(Rack::Firebase.configuration.project_ids).to eq([])
+      expect(Rack::Firebase.configuration.public_routes).to eq([])
     end
   end
 end

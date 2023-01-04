@@ -16,30 +16,37 @@ module Rack
       end
 
       def call(env)
-        token = AuthorizationHeader.read_token(env)
-        decoded_token = TokenDecoder.new.call(token)
+        path = env.fetch("PATH_INFO", "no-match")
+        if config.public_routes.none? { |r| r.match(path) }
+          begin
+            token = AuthorizationHeader.read_token(env)
+            decoded_token = TokenDecoder.new.call(token)
 
-        raise Rack::Firebase::InvalidSubError.new("Invalid subject") if decoded_token["sub"].nil? || decoded_token["sub"] == ""
-        raise Rack::Firebase::InvalidAuthTimeError.new("Invalid auth time") unless decoded_token["auth_time"] <= Time.now.to_i
+            raise Rack::Firebase::InvalidSubError.new("Invalid subject") if decoded_token["sub"].nil? || decoded_token["sub"] == ""
+            raise Rack::Firebase::InvalidAuthTimeError.new("Invalid auth time") unless decoded_token["auth_time"] <= Time.now.to_i
 
-        env[USER_UID] = decoded_token["sub"]
-        @app.call(env)
-      rescue JWT::JWKError => error # Issues with fetched JWKs
-        error_responder.call(error, "unauthorized")
-      rescue JWT::ExpiredSignature => error # Token has expired
-        error_responder.call(error, "expired")
-      rescue JWT::InvalidIatError => error # invalid issued at claim (iat)
-        error_responder.call(error, "unauthorized")
-      rescue JWT::InvalidIssuerError => error # invalid issuer
-        error_responder.call(error, "unauthorized")
-      rescue JWT::InvalidAudError => error # invalid audience
-        error_responder.call(error, "unauthorized")
-      rescue JWT::DecodeError => error # General JWT error
-        error_responder.call(error, "unauthorized")
-      rescue Rack::Firebase::InvalidSubError => error # subject is empty or missing
-        error_responder.call(error, "unauthorized")
-      rescue Rack::Firebase::InvalidAuthTimeError => error # auth time is in the future
-        error_responder.call(error, "unauthorized")
+            env[USER_UID] = decoded_token["sub"]
+            @app.call(env)
+          rescue JWT::JWKError => error # Issues with fetched JWKs
+            error_responder.call(error, "unauthorized")
+          rescue JWT::ExpiredSignature => error # Token has expired
+            error_responder.call(error, "expired")
+          rescue JWT::InvalidIatError => error # invalid issued at claim (iat)
+            error_responder.call(error, "unauthorized")
+          rescue JWT::InvalidIssuerError => error # invalid issuer
+            error_responder.call(error, "unauthorized")
+          rescue JWT::InvalidAudError => error # invalid audience
+            error_responder.call(error, "unauthorized")
+          rescue JWT::DecodeError => error # General JWT error
+            error_responder.call(error, "unauthorized")
+          rescue Rack::Firebase::InvalidSubError => error # subject is empty or missing
+            error_responder.call(error, "unauthorized")
+          rescue Rack::Firebase::InvalidAuthTimeError => error # auth time is in the future
+            error_responder.call(error, "unauthorized")
+          end
+        else
+          @app.call(env)
+        end
       end
 
       private
