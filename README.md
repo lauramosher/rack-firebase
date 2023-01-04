@@ -70,6 +70,85 @@ end
 
 From here, you can invoke `authenticate_user!` to ensure the token subject is actually a user in your application and use `current_user` to scope your requests or handle more granular authorization.
 
+### Testing
+
+In order to test your authenticated routes, you'll need to provide a valid token in the authorization header.
+
+Since Firebase typically issues signed tokens using their certificates, this can make it difficult to test your authenticated routes with valid tokens.
+
+As such, some test helpers are provided to help faciliate automated testing.
+
+> Note: For manual testing, it is recommended to create a test-specific user in your Firebase project and test the full authentication flow with your routes.
+
+#### Mocking requests for public keys
+
+There are two options for mocking the requests from Google; choose the one that best fits your testing library and needs:
+
+1. Explicitly start and stop firebase mocks, or
+2. Wrap each example that needs to be mocked.
+
+```ruby
+# Require the test helpers
+require "rack/firebase/test_helpers"
+
+describe "your request specs" do
+  # Explicitly mock before/after
+  before { Rack::Firebase::TestHelpers.mock_start }
+  after { Rack::Firebase::TestHelpers.mock_end }
+
+  # Or wrap each example
+  # This is for RSpec only! Use setup/teardown or before/after with the explicit mock for Minitest.
+  around(:example) do |example|
+    Rack::Firebase::TestHelpers.mock_signature_verification do
+      example.run
+    end
+  end
+end
+```
+
+Optionally, you can pass minutes as a number to `mock_start` to overwrite when the cache key should be refreshed. By default, this is set to `5000`, or approximately 83 minutes.
+
+#### Generating Tokens
+
+A test helper is provided that will generate a valid token and add it to your request headers for your specs.
+
+```ruby
+# Require the test helpers
+require "rack/firebase/test_helpers"
+
+it "tests something" do
+  user = fetch_user() # this presumes your user has a `uid`!
+  headers = { "Accept" => "application/json", "Content-Type" => "application/json" }
+
+  # This will generate a valid token and add it to your headers
+  auth_headers = Rack::Firebase::TestHelpers.auth_headers(headers, user.uid)
+
+  get "/", headers: auth_headers
+
+  expect(last_response).to be_ok
+end
+```
+
+##### Customizing
+
+By default, the token will be created using the first project ID provided in your configuration. If your app is configured for multiple projects and you wish to test one of the other projects, you can optionally add the `aud` to the arguments:
+
+```ruby
+Rack::Firebase::TestHelpers.auth_headers(headers, user.uid, aud: "different-project")
+```
+
+There is a fourth arg that takes a hash of options that will let you alter the payload.
+
+> Caution: it is possible for provided options to produce invalid tokens.
+
+| argument | description | default |
+| --- | --- | --- |
+| email | User's email address used for authentication. Added to the payload as `email` and included in the array of email identities in `firebase.identities.email` | test@test.com |
+| verified | Denotes if the email used to sign in is verified by the user | false |
+| auth_time | The last authentication time recorded by Google | Current time |
+| iat | Denotes the time the token was issued. When iat is provided, but not an auth time, the auth time is also set to the iat time. | Current time |
+| exp | Denotes when the token expires | Current time + 5000 |
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub.
