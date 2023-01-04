@@ -4,8 +4,6 @@ require "net/http"
 module Rack
   module Firebase
     class Middleware
-      ALG = "RS256".freeze
-      CERTIFICATE_URL = "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com".freeze
       USER_UID = "firebase.user.uid"
 
       def initialize(app)
@@ -19,16 +17,7 @@ module Rack
 
       def call(env)
         token = AuthorizationHeader.read_token(env)
-        decoded_token, _ = JWT.decode(
-          token, nil, true,
-          {
-            jwks: jwt_loader,
-            algorithm: ALG,
-            verify_iat: true,
-            verify_aud: true, aud: config.project_ids,
-            verify_iss: true, iss: firebase_issuers
-          }
-        )
+        decoded_token = TokenDecoder.new.call(token)
 
         raise Rack::Firebase::InvalidSubError.new("Invalid subject") if decoded_token["sub"].nil? || decoded_token["sub"] == ""
         raise Rack::Firebase::InvalidAuthTimeError.new("Invalid auth time") unless decoded_token["auth_time"] <= Time.now.to_i

@@ -16,20 +16,8 @@ RSpec.describe Rack::Firebase::Middleware do
   end
 
   after do
-    described_class.instance_variable_set(:@cached_keys, nil)
-    described_class.instance_variable_set(:@refresh_cache_by, nil)
-  end
-
-  describe "::ALG" do
-    it "returns Firebase's algorithm" do
-      expect(described_class::ALG).to eq("RS256")
-    end
-  end
-
-  describe "::CERTIFICATE_URL" do
-    it "returns Firebase's Certification Endpoint" do
-      expect(described_class::CERTIFICATE_URL).to eq("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
-    end
+    Rack::Firebase.instance_variable_set(:@cached_keys, nil)
+    Rack::Firebase.instance_variable_set(:@refresh_cache_by, nil)
   end
 
   describe "::USER_UID" do
@@ -146,8 +134,8 @@ RSpec.describe Rack::Firebase::Middleware do
         }
 
         before do
-          described_class.instance_variable_set(:@cached_keys, cached_jwks)
-          described_class.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
+          Rack::Firebase.instance_variable_set(:@cached_keys, cached_jwks)
+          Rack::Firebase.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
         end
 
         it "returns a 401 unauthorized" do
@@ -166,8 +154,8 @@ RSpec.describe Rack::Firebase::Middleware do
       let(:exp) { Time.now.to_i - 1000 }
 
       before do
-        described_class.instance_variable_set(:@cached_keys, cached_jwks)
-        described_class.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
+        Rack::Firebase.instance_variable_set(:@cached_keys, cached_jwks)
+        Rack::Firebase.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
       end
 
       it "returns a 401 unauthorized" do
@@ -187,8 +175,8 @@ RSpec.describe Rack::Firebase::Middleware do
       end
 
       before do
-        described_class.instance_variable_set(:@cached_keys, cached_jwks)
-        described_class.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
+        Rack::Firebase.instance_variable_set(:@cached_keys, cached_jwks)
+        Rack::Firebase.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
       end
 
       it "returns a 401 unauthorized" do
@@ -204,8 +192,8 @@ RSpec.describe Rack::Firebase::Middleware do
       let(:aud) { "different-audience" }
 
       before do
-        described_class.instance_variable_set(:@cached_keys, cached_jwks)
-        described_class.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
+        Rack::Firebase.instance_variable_set(:@cached_keys, cached_jwks)
+        Rack::Firebase.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
       end
 
       it "returns a 401 unauthorized" do
@@ -221,8 +209,8 @@ RSpec.describe Rack::Firebase::Middleware do
       let(:iat) { Time.now.to_i + 100 } # in the future
 
       before do
-        described_class.instance_variable_set(:@cached_keys, cached_jwks)
-        described_class.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
+        Rack::Firebase.instance_variable_set(:@cached_keys, cached_jwks)
+        Rack::Firebase.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
       end
 
       it "returns a 401 unauthorized" do
@@ -238,8 +226,8 @@ RSpec.describe Rack::Firebase::Middleware do
       let(:uid) { nil }
 
       before do
-        described_class.instance_variable_set(:@cached_keys, cached_jwks)
-        described_class.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
+        Rack::Firebase.instance_variable_set(:@cached_keys, cached_jwks)
+        Rack::Firebase.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
       end
 
       it "returns a 401 unauthorized" do
@@ -255,8 +243,8 @@ RSpec.describe Rack::Firebase::Middleware do
       let(:uid) { "" }
 
       before do
-        described_class.instance_variable_set(:@cached_keys, cached_jwks)
-        described_class.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
+        Rack::Firebase.instance_variable_set(:@cached_keys, cached_jwks)
+        Rack::Firebase.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
       end
 
       it "returns a 401 unauthorized" do
@@ -273,8 +261,8 @@ RSpec.describe Rack::Firebase::Middleware do
       let(:iat) { Time.now.to_i - 60 } # 1 minute in the past
 
       before do
-        described_class.instance_variable_set(:@cached_keys, cached_jwks)
-        described_class.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
+        Rack::Firebase.instance_variable_set(:@cached_keys, cached_jwks)
+        Rack::Firebase.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
       end
 
       it "returns a 401 unauthorized" do
@@ -288,8 +276,8 @@ RSpec.describe Rack::Firebase::Middleware do
 
     context "when token is valid" do
       before do
-        described_class.instance_variable_set(:@cached_keys, cached_jwks)
-        described_class.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
+        Rack::Firebase.instance_variable_set(:@cached_keys, cached_jwks)
+        Rack::Firebase.instance_variable_set(:@refresh_cache_by, Time.now.to_i + 5000)
       end
 
       it "returns a 200 success" do
@@ -319,7 +307,7 @@ RSpec.describe Rack::Firebase::Middleware do
 
       it "caches the keys on the first request so it doesn't make additional requests" do
         expect(JWT).to receive(:decode).exactly(3).times.and_call_original
-        expect(Net::HTTP).to receive(:get_response).with(URI(described_class::CERTIFICATE_URL)).once { net_response }
+        expect(Net::HTTP).to receive(:get_response).with(URI(Rack::Firebase::CERTIFICATE_URL)).once { net_response }
 
         header "AUTHORIZATION", "Bearer #{token}"
         get "/"
@@ -342,8 +330,8 @@ RSpec.describe Rack::Firebase::Middleware do
       }
 
       before do
-        described_class.instance_variable_set(:@cached_keys, cached_jwks)
-        described_class.instance_variable_set(:@refresh_cache_by, current_time + 5000)
+        Rack::Firebase.instance_variable_set(:@cached_keys, cached_jwks)
+        Rack::Firebase.instance_variable_set(:@refresh_cache_by, current_time + 5000)
       end
 
       it "does not request public keys on request" do
@@ -358,7 +346,7 @@ RSpec.describe Rack::Firebase::Middleware do
         let(:cache_control) { "public, max-age=19302, must-revalidate, no-transform" }
 
         before do
-          described_class.instance_variable_set(:@refresh_cache_by, current_time + 1200)
+          Rack::Firebase.instance_variable_set(:@refresh_cache_by, current_time + 1200)
 
           allow(net_response).to receive(:[]).with("Cache-Control").and_return(cache_control)
           allow(net_response).to receive(:body).and_return(certs)
@@ -366,13 +354,13 @@ RSpec.describe Rack::Firebase::Middleware do
 
         it "resets cache and re-requests public keys" do
           expect(JWT).to receive(:decode).once.and_call_original
-          expect(Net::HTTP).to receive(:get_response).with(URI(described_class::CERTIFICATE_URL)).once { net_response }
+          expect(Net::HTTP).to receive(:get_response).with(URI(Rack::Firebase::CERTIFICATE_URL)).once { net_response }
 
           header "AUTHORIZATION", "Bearer #{token}"
           get "/"
 
-          expect(described_class.instance_variable_get(:@refresh_cache_by)).to be_within(1).of(current_time + 19302)
-          expect(described_class.instance_variable_get(:@cached_keys).map(&:kid)).not_to include("this-key-should-be-busted")
+          expect(Rack::Firebase.instance_variable_get(:@refresh_cache_by)).to be_within(1).of(current_time + 19302)
+          expect(Rack::Firebase.instance_variable_get(:@cached_keys).map(&:kid)).not_to include("this-key-should-be-busted")
         end
       end
     end

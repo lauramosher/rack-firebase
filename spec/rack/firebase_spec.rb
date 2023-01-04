@@ -5,6 +5,18 @@ RSpec.describe Rack::Firebase do
     expect(Rack::Firebase::VERSION).not_to be nil
   end
 
+  describe "::ALG" do
+    it "returns Firebase's algorithm" do
+      expect(described_class::ALG).to eq("RS256")
+    end
+  end
+
+  describe "::CERTIFICATE_URL" do
+    it "returns Firebase's Certification Endpoint" do
+      expect(described_class::CERTIFICATE_URL).to eq("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
+    end
+  end
+
   describe "#reset!" do
     before do
       Rack::Firebase.configure do |config|
